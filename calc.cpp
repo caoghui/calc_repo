@@ -7,8 +7,12 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <iterator>
+#include <algorithm>
 #include <map>
 #include <cctype>
+#include <vector>
 #include "util.h"
 #include "log.h"
 
@@ -28,8 +32,10 @@ Token_value curr_tok = PRINT;
 double number_value;
 string string_value;
 int no_of_errors;
-
 map<string, double> table;
+istream* input;    //指向输入流
+
+
 //每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
 
 double term(bool get);  //乘和除
@@ -44,11 +50,29 @@ double error(const string& msg);
 int main(int argc, char** argv)
 {
     //cout<<"desktop calc running...."<<endl;
+    vector<string> args(argv, argv + argc);
+    copy(args.begin(), args.end(), ostream_iterator<string>(cout, "\n"));
+    //return 0;
+
+    
+    switch(argc)
+    {
+    	case 1:
+    		input = &cin;
+    		break;
+    	case 2:
+    		input = new istringstream(argv[1]);
+    		break;
+    	default:
+    		error("too many arguments");
+    		return 1;
+    }
+    
     LOG("desktop calc running, please input expression : ");
 	table["pi"] = 3.1415926535897932385;
 	table["e"]  = 2.7182818284590452354;
 	
-	while(cin)
+	while(*input)
 	{
 		get_token();
 		if(curr_tok == END)
@@ -62,6 +86,8 @@ int main(int argc, char** argv)
 		}	
 		cout<<expr(false)<<endl;
 	}
+	if(input != &cin)
+		delete input;
     return no_of_errors;
 }
 
@@ -156,7 +182,7 @@ Token_value get_token()
 	do
 	{
 		//跳过空白，除了'\n'
-		if(!cin.get(ch))
+		if(!(*input).get(ch))
 		{
 			return curr_tok=END;
 		}
@@ -178,8 +204,8 @@ Token_value get_token()
 		case '0':case '1':case '2':case '3':case '4':
 		case '5':case '6':case '7':case '8':case '9':
 		case '.':
-			cin.putback(ch);
-			cin>>number_value;
+			(*input).putback(ch);
+			(*input)>>number_value;
 			return curr_tok = NUMBER;
 		default:   //NAME, NAME=, or error
 			if(isalpha(ch))
@@ -188,11 +214,11 @@ Token_value get_token()
 				//cin>>string_value; //采用>>读入字符串直到遇到空白会引起问题.这一问题可以通过一次读一个字符，直到遇到非字母非数字
 				//字符的方式解决.
 				string_value = ch;
-				while(cin.get(ch) && isalnum(ch))
+				while((*input).get(ch) && isalnum(ch))
 				{
 					string_value.push_back(ch);
 				}
-				cin.putback(ch);
+				(*input).putback(ch);
 				return curr_tok = NAME;
 			}
 			error("bad token");
