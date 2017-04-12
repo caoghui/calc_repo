@@ -57,6 +57,7 @@ int main(int argc, char** argv)
 		}
 		if(curr_tok == PRINT)
 		{
+			cout<<"input token : PRINT"<<endl;
 			continue;
 		}	
 		cout<<expr(false)<<endl;
@@ -148,14 +149,25 @@ double prim(bool get)  //处理初等项
 //去读一个字符，根据它决定需要去组合的是哪种单词，而后返回表示被读单词的Token_value值
 Token_value get_token()
 {
-	char ch = 0;
-	cin>>ch;
+	//char ch = 0;
+	//cin>>ch;  
+	//用读入单个字符的代码来代替基于类型的默认输入操作，将换行符看做与分号等价，当做表达式结束。
+	char ch;
+	do
+	{
+		//跳过空白，除了'\n'
+		if(!cin.get(ch))
+		{
+			return curr_tok=END;
+		}
+	}while(ch != '\n' && isspace(ch));
+	
 
 	switch(ch)
 	{
-		case 0:
-			return curr_tok = END;
 		case ';':
+		case '\n':
+			return curr_tok = PRINT;
 		case '*':
 		case '/':
 		case '+':
@@ -172,8 +184,15 @@ Token_value get_token()
 		default:   //NAME, NAME=, or error
 			if(isalpha(ch))
 			{
+				//cin.putback(ch);
+				//cin>>string_value; //采用>>读入字符串直到遇到空白会引起问题.这一问题可以通过一次读一个字符，直到遇到非字母非数字
+				//字符的方式解决.
+				string_value = ch;
+				while(cin.get(ch) && isalnum(ch))
+				{
+					string_value.push_back(ch);
+				}
 				cin.putback(ch);
-				cin>>string_value;
 				return curr_tok = NAME;
 			}
 			error("bad token");
