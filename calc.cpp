@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <cctype>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ Token_value curr_tok = PRINT;
 
 double number_value;
 string string_value;
+int no_of_errors;
 
 map<string, double> table;
 //每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
@@ -40,8 +42,19 @@ double error(const string& msg);
 int main(int argc, char** argv)
 {
     cout<<"desktop calc running...."<<endl;
-
-    return 0;
+	table["pi"] = 3.1415926535897932385;
+	table["e"]  = 2.7182818284590452354;
+	
+	while(cin)
+	{
+		get_token();
+		if(curr_tok == END)
+			break;
+		if(curr_tok == PRINT)
+			continue;
+		cout<<expr(false)<<endl;
+	}
+    return no_of_errors;
 }
 
 double expr(bool get)  //加和减
@@ -130,10 +143,41 @@ Token_value get_token()
 {
 	char ch = 0;
 	cin>>ch;
+	switch(ch)
+	{
+		case 0:
+			return curr_tok = END;
+		case ';':
+		case '*':
+		case '/':
+		case '+':
+		case '-':
+		case '(':
+		case ')':
+			return curr_tok = Token_value(ch);
+		case '0':case '1':case '2':case '3':case '4':
+		case '5':case '6':case '7':case '8':case '9':
+		case '.':
+			cin.putback(ch);
+			cin>>number_value;
+			return curr_tok = NUMBER;
+		default:   //NAME, NAME=, or error
+			if(isalpha(ch))
+			{
+				cin.putback(ch);
+				cin>>string_value;
+				return curr_tok = NAME;
+			}
+			error("bad token");
+			return curr_tok = PRINT;
+		
+	}
 }
 
 double error(const string& msg)
 {
-	return 0;
+	no_of_errors++;
+	cerr<<"error : "<<msg<<endl;
+	return 1;
 }
 
