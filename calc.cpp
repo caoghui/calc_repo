@@ -9,6 +9,8 @@
 #include <string>
 #include <map>
 #include <cctype>
+#include "util.h"
+#include "log.h"
 
 using namespace std;
 
@@ -41,7 +43,8 @@ double error(const string& msg);
 
 int main(int argc, char** argv)
 {
-    cout<<"desktop calc running...."<<endl;
+    //cout<<"desktop calc running...."<<endl;
+    LOG("desktop calc running, please input expression : ");
 	table["pi"] = 3.1415926535897932385;
 	table["e"]  = 2.7182818284590452354;
 	
@@ -49,9 +52,13 @@ int main(int argc, char** argv)
 	{
 		get_token();
 		if(curr_tok == END)
+		{
 			break;
+		}
 		if(curr_tok == PRINT)
+		{
 			continue;
+		}	
 		cout<<expr(false)<<endl;
 	}
     return no_of_errors;
@@ -143,6 +150,7 @@ Token_value get_token()
 {
 	char ch = 0;
 	cin>>ch;
+
 	switch(ch)
 	{
 		case 0:
