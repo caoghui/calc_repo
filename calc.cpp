@@ -35,6 +35,125 @@ int no_of_errors;
 map<string, double> table;
 istream* input;    //指向输入流
 
+//利用命名空间改造程序
+namespace Error
+{
+	double error(const string& msg)
+	{
+		return 1;
+	}
+}
+namespace Lexer
+{
+	enum Token_value {
+		NAME, NUMBER, END,
+		PLUS='+', MINUS='-', MUL='*', DIV='/',
+		PRINT=';', ASSIGN='=', LP='(', RP=')'
+	};
+	
+	Token_value curr_tok;
+	double number_value;
+	string string_value;
+	
+	Token_value get_token()
+	{
+		return curr_tok = PRINT;
+	}
+}
+
+namespace Parser
+{
+	double expr(bool);
+	double prim(bool);
+	double term(bool);
+	
+	using Lexer::curr_tok;
+	using Lexer::get_token;
+	using Error::error;
+}
+
+double Parser::prim(bool get)
+{
+	if(get)
+		get_token();
+	
+	switch(curr_tok)
+	{
+		case Lexer::NUMBER:
+			get_token();
+			return Lexer::number_value;
+		case Lexer::NAME:
+		{
+			double& v = table[Lexer::string_value];
+			if(get_token() == Lexer::ASSIGN)
+			{
+				v = expr(true);
+			}
+			return v;
+		}
+		case Lexer::MINUS:
+			return -prim(true);
+		case Lexer::LP:
+		{
+			double e = expr(true);
+			if(curr_tok != Lexer::RP)
+			{
+				return error(") expected");
+			}
+			get_token();
+			return e;
+		}
+		case Lexer::END:
+			return 1;
+		default:
+			return error("primary expected");
+	}
+}
+
+double Parser::term(bool get)
+{
+	double left = prim(get);
+	for(;;)
+	{
+		switch(Lexer::curr_tok)
+		{
+			case Lexer::MUL:
+				left *= prim(true);
+				break;
+			case Lexer::DIV:
+				if(double d = prim(true))
+				{
+					left /= d;
+					break;
+				}
+				return error("divide by 0");
+			default:
+				return left;
+				
+		}
+	}
+	return 0;
+}
+
+double Parser::expr(bool get)
+{
+	double left = term(get);
+	
+	for(;;)
+	{
+		switch(curr_tok)
+		{
+		case Lexer::PLUS:
+			left += term(true);
+			break;
+		case Lexer::MINUS:
+			left -= term(true);
+			break;
+		default:
+			return left;
+		}
+	}
+}
 
 //每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
 
@@ -92,8 +211,7 @@ int main(int argc, char** argv)
 }
 
 double expr(bool get)  //加和减
-{
-	
+{	
 	double left = term(get);
 	
 	for(;;)
