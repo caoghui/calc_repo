@@ -19,6 +19,7 @@
 using namespace std;
 
 //单词(token)用它们的字符所对应的整数表示.
+/*
 enum Token_value
 {
 	NAME, NUMBER, END,
@@ -31,17 +32,16 @@ Token_value curr_tok = PRINT;
 
 double number_value;
 string string_value;
+*/
 int no_of_errors;
+
 map<string, double> table;
 istream* input;    //指向输入流
 
 //利用命名空间改造程序
 namespace Error
 {
-	double error(const string& msg)
-	{
-		return 1;
-	}
+	double error(const string& msg);
 }
 namespace Lexer
 {
@@ -55,10 +55,7 @@ namespace Lexer
 	double number_value;
 	string string_value;
 	
-	Token_value get_token()
-	{
-		return curr_tok = PRINT;
-	}
+	Token_value get_token();
 }
 
 namespace Parser
@@ -71,6 +68,65 @@ namespace Parser
 	using Lexer::get_token;
 	using Error::error;
 }
+
+
+
+//每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
+
+//double term(bool get);  //乘和除
+//double expr(bool get);  //expr()处理加和减。它由一个查找被加减的项的循环组成.
+//double prim(bool get);
+
+//Token_value get_token();
+//double error(const string& msg);
+
+
+int main(int argc, char** argv)
+{
+    //cout<<"desktop calc running...."<<endl;
+    vector<string> args(argv, argv + argc);
+    copy(args.begin(), args.end(), ostream_iterator<string>(cout, "\n"));
+    //return 0;
+    using namespace Parser;
+    using namespace Lexer;
+    using namespace Error;
+    
+    switch(argc)
+    {
+    	case 1:
+    		input = &cin;
+    		break;
+    	case 2:
+    		input = new istringstream(argv[1]);
+    		break;
+    	default:
+    		error("too many arguments");
+    		return 1;
+    }
+    
+    LOG("desktop calc running, please input expression : ");
+	table["pi"] = 3.1415926535897932385;
+	table["e"]  = 2.7182818284590452354;
+	
+	while(*input)
+	{
+		get_token();
+		if(curr_tok == END)
+		{
+			break;
+		}
+		if(curr_tok == PRINT)
+		{
+			cout<<"input token : PRINT"<<endl;
+			continue;
+		}	
+		cout<<Parser::expr(false)<<endl;
+	}
+	if(input != &cin)
+		delete input;
+    return no_of_errors;
+}
+
 
 double Parser::prim(bool get)
 {
@@ -155,61 +211,7 @@ double Parser::expr(bool get)
 	}
 }
 
-//每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
-
-double term(bool get);  //乘和除
-double expr(bool get);  //expr()处理加和减。它由一个查找被加减的项的循环组成.
-double prim(bool get);
-
-Token_value get_token();
-
-double error(const string& msg);
-
-
-int main(int argc, char** argv)
-{
-    //cout<<"desktop calc running...."<<endl;
-    vector<string> args(argv, argv + argc);
-    copy(args.begin(), args.end(), ostream_iterator<string>(cout, "\n"));
-    //return 0;
-
-    
-    switch(argc)
-    {
-    	case 1:
-    		input = &cin;
-    		break;
-    	case 2:
-    		input = new istringstream(argv[1]);
-    		break;
-    	default:
-    		error("too many arguments");
-    		return 1;
-    }
-    
-    LOG("desktop calc running, please input expression : ");
-	table["pi"] = 3.1415926535897932385;
-	table["e"]  = 2.7182818284590452354;
-	
-	while(*input)
-	{
-		get_token();
-		if(curr_tok == END)
-		{
-			break;
-		}
-		if(curr_tok == PRINT)
-		{
-			cout<<"input token : PRINT"<<endl;
-			continue;
-		}	
-		cout<<expr(false)<<endl;
-	}
-	if(input != &cin)
-		delete input;
-    return no_of_errors;
-}
-
+/*
 double expr(bool get)  //加和减
 {	
 	double left = term(get);
@@ -289,9 +291,9 @@ double prim(bool get)  //处理初等项
 			return error("primary expected");
 	}
 }
-
+*/
 //去读一个字符，根据它决定需要去组合的是哪种单词，而后返回表示被读单词的Token_value值
-Token_value get_token()
+Lexer::Token_value Lexer::get_token()
 {
 	//char ch = 0;
 	//cin>>ch;  
@@ -306,7 +308,6 @@ Token_value get_token()
 		}
 	}while(ch != '\n' && isspace(ch));
 	
-
 	switch(ch)
 	{
 		case ';':
@@ -339,16 +340,17 @@ Token_value get_token()
 				(*input).putback(ch);
 				return curr_tok = NAME;
 			}
-			error("bad token");
+			Error::error("bad token");
 			return curr_tok = PRINT;
-		
 	}
 }
 
-double error(const string& msg)
+double Error::error(const string& msg)
 {
 	no_of_errors++;
 	cerr<<"error : "<<msg<<endl;
 	return 1;
 }
+
+
 
