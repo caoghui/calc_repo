@@ -184,7 +184,7 @@ Token_value get_token()
 		//跳过空白，除了'\n'
 		if(!(*input).get(ch))
 		{
-			return curr_tok=END;
+			return curr_tok = END;
 		}
 	}while(ch != '\n' && isspace(ch));
 	
