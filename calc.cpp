@@ -18,28 +18,7 @@
 
 using namespace std;
 
-//单词(token)用它们的字符所对应的整数表示.
-/*
-enum Token_value
-{
-	NAME, NUMBER, END,
-	PLUS='+', MINUS='-', MUL='*', DIV='/',
-	PRINT=';', ASSIGN='=', LP='(', RP=')'
-};
-
-Token_value curr_tok = PRINT;
-
-
-double number_value;
-string string_value;
-*/
-
-
-map<string, double> table;
-//istream* input;    //指向输入流
-
 //利用命名空间改造程序
-
 
 namespace Error
 {	
@@ -56,6 +35,7 @@ namespace Driver
 {
 	int no_of_errors;
 	istream* input;
+	
 	void skip();
 	int run(int argc, char** argv);
 }
@@ -79,6 +59,8 @@ namespace Lexer
 
 namespace Parser
 {
+	map<string, double> table;
+	
 	double expr(bool);
 	double prim(bool);
 	double term(bool);
@@ -97,7 +79,6 @@ double Parser_interface::expr(bool get)
 {
 	return Parser::expr(get);
 }
-
 
 //每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
 
@@ -160,14 +141,14 @@ int Driver::run(int argc, char** argv)
 		catch(Error::Zero_divide)
 		{
 			cerr<<"attempt to divide by zero"<<endl;
-			if(Lexer::curr_tok != Lexer::PRINT) ;
-				//skip();
+			if(Lexer::curr_tok != Lexer::PRINT) 
+				skip();
 		}
 		catch(Error::Syntax_error e)
 		{
 			cerr<<"syntax error : "<<e.p<<endl;
-			if(Lexer::curr_tok != Lexer::PRINT) ;
-				//skip();
+			if(Lexer::curr_tok != Lexer::PRINT) 
+				skip();
 		}
 	}
 	if(input != &cin)
@@ -202,7 +183,6 @@ double Parser::prim(bool get)
 			double e = expr(true);
 			if(curr_tok != Lexer::RP)
 			{
-				//return error(") expected");
 				throw Error::Syntax_error(") expected");
 			}
 			get_token();
@@ -211,7 +191,6 @@ double Parser::prim(bool get)
 		case Lexer::END:
 			return 1;
 		default:
-			//return error("primary expected");
 			throw Error::Syntax_error("primary expected");
 	}
 }
@@ -232,7 +211,6 @@ double Parser::term(bool get)
 					left /= d;
 					break;
 				}
-				//return error("divide by 0");
 				throw Error::Zero_divide();
 			default:
 				return left;
@@ -278,87 +256,6 @@ void Driver::skip()
 	}
 }
 
-/*
-double expr(bool get)  //加和减
-{	
-	double left = term(get);
-	
-	for(;;)
-	{
-		switch(curr_tok)
-		{
-		case PLUS:
-			left += term(true);
-			break;
-		case MINUS:
-			left -= term(true);
-			break;
-		default:
-			return left;
-		}
-	}
-}
-
-double term(bool get)
-{
-	double left = prim(get);
-	for(;;)
-	{
-		switch(curr_tok)
-		{
-		case MUL:
-			left *= prim(true);
-			break;
-		case DIV:
-			if(double d = prim(true))
-			{
-				left /= d;
-				break;
-			}
-			return error("divide by 0");
-		default:
-			return left;
-		}
-	}
-}
-
-double prim(bool get)  //处理初等项
-{
-	if(get) get_token();
-	switch(curr_tok)
-	{
-		case NUMBER:
-		{
-			double v = number_value;
-			get_token();
-			return v;
-		}
-		case NAME:
-		{
-			double& v = table[string_value];
-			if(get_token() == ASSIGN)
-			{
-				v = expr(true);
-			}
-			return v;
-		}
-		case MINUS:
-			return -prim(true);
-		case LP:
-		{
-			double e = expr(true);
-			if(curr_tok != RP)
-			{
-				return error(") expected");
-			}
-			get_token();   //吃掉 )
-			return e;
-		}
-		default:
-			return error("primary expected");
-	}
-}
-*/
 //去读一个字符，根据它决定需要去组合的是哪种单词，而后返回表示被读单词的Token_value值
 Lexer::Token_value Lexer::get_token()
 {
@@ -407,19 +304,9 @@ Lexer::Token_value Lexer::get_token()
 				(*input).putback(ch);
 				return curr_tok = NAME;
 			}
-			//Error::error("bad token");
-			//return curr_tok = PRINT;
 			throw Error::Syntax_error("bad token");
 	}
 }
 
-/*
-double Error::error(const string& msg)
-{
-	no_of_errors++;
-	cerr<<"error : "<<msg<<endl;
-	return 1;
-}
-*/
 
 
