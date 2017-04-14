@@ -42,7 +42,8 @@ namespace Driver
 
 namespace Lexer
 {
-	enum Token_value {
+	enum Token_value 
+	{
 		NAME, NUMBER, END,
 		PLUS='+', MINUS='-', MUL='*', DIV='/',
 		PRINT=';', ASSIGN='=', LP='(', RP=')'
@@ -80,18 +81,8 @@ double Parser_interface::expr(bool get)
 	return Parser::expr(get);
 }
 
-//每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
-
-//double term(bool get);  //乘和除
-//double expr(bool get);  //expr()处理加和减。它由一个查找被加减的项的循环组成.
-//double prim(bool get);
-
-//Token_value get_token();
-//double error(const string& msg);
-
 int main(int argc, char** argv)
 {
-	//cout<<"desktop calc running...."<<endl;
     vector<string> args(argv, argv + argc);
     copy(args.begin(), args.end(), ostream_iterator<string>(cout, "\n"));
     
