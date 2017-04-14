@@ -33,16 +33,33 @@ Token_value curr_tok = PRINT;
 double number_value;
 string string_value;
 */
-int no_of_errors;
+
 
 map<string, double> table;
-istream* input;    //指向输入流
+//istream* input;    //指向输入流
 
 //利用命名空间改造程序
+
+
 namespace Error
-{
-	double error(const string& msg);
+{	
+	struct Zero_divide {};
+	
+	struct Syntax_error
+	{
+		const char* p;
+		Syntax_error(const char* q) { p = q; }
+	};
 }
+
+namespace Driver
+{
+	int no_of_errors;
+	istream* input;
+	void skip();
+	int run(int argc, char** argv);
+}
+
 namespace Lexer
 {
 	enum Token_value {
@@ -56,6 +73,8 @@ namespace Lexer
 	string string_value;
 	
 	Token_value get_token();
+	
+	using Driver::input;
 }
 
 namespace Parser
@@ -66,9 +85,18 @@ namespace Parser
 	
 	using Lexer::curr_tok;
 	using Lexer::get_token;
-	using Error::error;
+	using namespace Error;
 }
 
+namespace Parser_interface
+{
+	double expr(bool);
+}
+
+double Parser_interface::expr(bool get)
+{
+	return Parser::expr(get);
+}
 
 
 //每个分析函数都有一个bool参数，指明该函数是否需要调用get_token()去取得下一个单词。每个分析函数都将对它的表达式求值并返回这个值。
@@ -80,13 +108,18 @@ namespace Parser
 //Token_value get_token();
 //double error(const string& msg);
 
-
 int main(int argc, char** argv)
 {
-    //cout<<"desktop calc running...."<<endl;
+	//cout<<"desktop calc running...."<<endl;
     vector<string> args(argv, argv + argc);
     copy(args.begin(), args.end(), ostream_iterator<string>(cout, "\n"));
-    //return 0;
+    
+    return Driver::run(argc, argv);
+}
+
+int Driver::run(int argc, char** argv)
+{
+    using namespace Driver;
     using namespace Parser;
     using namespace Lexer;
     using namespace Error;
@@ -100,7 +133,7 @@ int main(int argc, char** argv)
     		input = new istringstream(argv[1]);
     		break;
     	default:
-    		error("too many arguments");
+    		cerr<<"too many arguments"<<endl;
     		return 1;
     }
     
@@ -110,23 +143,38 @@ int main(int argc, char** argv)
 	
 	while(*input)
 	{
-		get_token();
-		if(curr_tok == END)
+		try
 		{
-			break;
+			Lexer::get_token();
+			if(Lexer::curr_tok == Lexer::END)
+			{
+				break;
+			}
+			if(Lexer::curr_tok == Lexer::PRINT)
+			{
+				cout<<"input token : PRINT"<<endl;
+				continue;
+			}	
+			cout<<Parser_interface::expr(false)<<endl;
 		}
-		if(curr_tok == PRINT)
+		catch(Error::Zero_divide)
 		{
-			cout<<"input token : PRINT"<<endl;
-			continue;
-		}	
-		cout<<Parser::expr(false)<<endl;
+			cerr<<"attempt to divide by zero"<<endl;
+			if(Lexer::curr_tok != Lexer::PRINT) ;
+				//skip();
+		}
+		catch(Error::Syntax_error e)
+		{
+			cerr<<"syntax error : "<<e.p<<endl;
+			if(Lexer::curr_tok != Lexer::PRINT) ;
+				//skip();
+		}
 	}
 	if(input != &cin)
 		delete input;
+		
     return no_of_errors;
 }
-
 
 double Parser::prim(bool get)
 {
@@ -154,7 +202,8 @@ double Parser::prim(bool get)
 			double e = expr(true);
 			if(curr_tok != Lexer::RP)
 			{
-				return error(") expected");
+				//return error(") expected");
+				throw Error::Syntax_error(") expected");
 			}
 			get_token();
 			return e;
@@ -162,7 +211,8 @@ double Parser::prim(bool get)
 		case Lexer::END:
 			return 1;
 		default:
-			return error("primary expected");
+			//return error("primary expected");
+			throw Error::Syntax_error("primary expected");
 	}
 }
 
@@ -182,7 +232,8 @@ double Parser::term(bool get)
 					left /= d;
 					break;
 				}
-				return error("divide by 0");
+				//return error("divide by 0");
+				throw Error::Zero_divide();
 			default:
 				return left;
 				
@@ -207,6 +258,22 @@ double Parser::expr(bool get)
 			break;
 		default:
 			return left;
+		}
+	}
+}
+
+void Driver::skip()
+{
+	no_of_errors++;
+	while(*input)
+	{
+		char ch;
+		input->get(ch);
+		switch(ch)
+		{
+			case '\n':
+			case ';':
+				return;
 		}
 	}
 }
@@ -340,17 +407,19 @@ Lexer::Token_value Lexer::get_token()
 				(*input).putback(ch);
 				return curr_tok = NAME;
 			}
-			Error::error("bad token");
-			return curr_tok = PRINT;
+			//Error::error("bad token");
+			//return curr_tok = PRINT;
+			throw Error::Syntax_error("bad token");
 	}
 }
 
+/*
 double Error::error(const string& msg)
 {
 	no_of_errors++;
 	cerr<<"error : "<<msg<<endl;
 	return 1;
 }
-
+*/
 
 
