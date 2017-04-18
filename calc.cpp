@@ -22,10 +22,6 @@ using namespace std;
 int Driver::no_of_errors = 0;
 istream* Driver::input = 0;
 
-double Parser_interface::expr(bool get)
-{
-	return Parser::expr(get);
-}
 
 int main(int argc, char** argv)
 {
@@ -36,12 +32,7 @@ int main(int argc, char** argv)
 }
 
 int Driver::run(int argc, char** argv)
-{
-    using namespace Driver;
-    using namespace Parser;
-    using namespace Lexer;
-    using namespace Error;
-    
+{    
     switch(argc)
     {
     	case 1:
@@ -93,7 +84,6 @@ int Driver::run(int argc, char** argv)
 		
     return no_of_errors;
 }
-
 
 void Driver::skip()
 {

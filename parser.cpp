@@ -7,6 +7,10 @@
 
 #include "dc.h"
 
+double Parser_interface::expr(bool get)
+{
+	return Parser::expr(get);
+}
 
 double Parser::prim(bool get)
 {
