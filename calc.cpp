@@ -15,7 +15,11 @@
 #include <vector>
 #include "util.h"
 #include "log.h"
-#include "dc.h"
+#include "lexer.h"
+#include "parser.h"
+#include "error.h"
+#include "table.h"
+#include "driver.h"
 
 using namespace std;
 
@@ -64,7 +68,7 @@ int Driver::run(int argc, char** argv)
 				cout<<"input token : PRINT"<<endl;
 				continue;
 			}	
-			cout<<Parser_interface::expr(false)<<endl;
+			cout<<Parser::expr(false)<<endl;
 		}
 		catch(Error::Zero_divide)
 		{

@@ -1,19 +1,16 @@
 /*************************************************************************
-	> File Name: dc.h
+	> File Name: parser.h
 	> Author: 
 	> Mail: 
-	> Created Time: 2017年04月18日 星期二 10时11分01秒
+	> Created Time: 2017年04月18日 星期二 14时31分07秒
  ************************************************************************/
 
-#ifndef _DC_H
-#define _DC_H
+#ifndef _PARSER_H
+#define _PARSER_H
 
-//利用命名空间改造程序
-
-
-
-
-
-
+namespace Parser
+{
+	double expr(bool);
+}
 
 #endif

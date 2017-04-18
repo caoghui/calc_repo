@@ -5,7 +5,9 @@
 	> Created Time: 2017年04月18日 星期二 10时26分25秒
  ************************************************************************/
 
-#include "dc.h"
+#include "lexer.h"
+#include "error.h"
+#include "driver.h"
 #include <iostream>
 #include <cctype>
 
@@ -16,6 +18,7 @@ std::string Lexer::string_value;
 //去读一个字符，根据它决定需要去组合的是哪种单词，而后返回表示被读单词的Token_value值
 Lexer::Token_value Lexer::get_token()
 {
+	using Driver::input;
 	//char ch = 0;
 	//cin>>ch;  
 	//用读入单个字符的代码来代替基于类型的默认输入操作，将换行符看做与分号等价，当做表达式结束。

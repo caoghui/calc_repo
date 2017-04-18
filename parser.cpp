@@ -5,12 +5,8 @@
 	> Created Time: 2017年04月18日 星期二 10时40分12秒
  ************************************************************************/
 
-#include "dc.h"
-
-double Parser_interface::expr(bool get)
-{
-	return Parser::expr(get);
-}
+#include "parser_impl.h"
+#include "table.h"
 
 double Parser::prim(bool get)
 {
