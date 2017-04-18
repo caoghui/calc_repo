@@ -13,5 +13,4 @@
 
 extern std::map<std::string, double> table;
 
-
 #endif
