@@ -9,15 +9,7 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
-#include <map>
-#include <cctype>
 #include <vector>
-#include "util.h"
-#include "log.h"
-#include "lexer.h"
-#include "parser.h"
-#include "error.h"
-#include "table.h"
 #include "driver.h"
 
 using namespace std;

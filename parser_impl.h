@@ -9,17 +9,12 @@
 #define _PARSER_IMPL_H
 
 #include "parser.h"
-#include "error.h"
-#include "lexer.h"
 
 namespace Parser
 {	
 	double expr(bool);
 	double prim(bool);
 	double term(bool);
-	
-	using Lexer::curr_tok;
-	using Lexer::get_token;
 }
 
 #endif

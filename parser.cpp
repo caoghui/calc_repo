@@ -7,6 +7,11 @@
 
 #include "parser_impl.h"
 #include "table.h"
+#include "error.h"
+#include "lexer.h"
+	
+using Lexer::curr_tok;
+using Lexer::get_token;
 
 double Parser::prim(bool get)
 {
